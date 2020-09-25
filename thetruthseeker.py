@@ -23,12 +23,12 @@ import os
 # =========================================================================== #
 
 CHROME_PATH     = '/Users/en-chengchang/Downloads/chromedriver'
+OUTPUT_PATH     = '/Users/en-chengchang/Desktop/bootcamp/PeerLearning/ML-Labs-webscraping/Data/'
 CATEGORY_URL    = 'http://www.thetruthseeker.co.uk/?page_id=12'
 MAIN_PAGE_PAT   = 'http://www.thetruthseeker.co.uk/?p='
-OUTPUT_PATH     = '/Users/en-chengchang/Desktop/bootcamp/PeerLearning/ML-Labs-webscraping/Data/'
-RESCRAPE_URL    = False
-RESCRAPE_POSTS  = False
-MAX_PAGE        = 10
+RESCRAPE_URL    = True
+RESCRAPE_POSTS  = True
+MAX_PAGE        = 20
 
 # =========================================================================== #
 #                                                                             #
