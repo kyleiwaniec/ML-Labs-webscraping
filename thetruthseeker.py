@@ -87,12 +87,12 @@ def scrape_posts():
         except: continue
     
 
-def txt2csv():
+def txt2xlsx():
     with open(OUTPUT_PATH + 'truthSeekerCont.txt', 'r') as files: 
         files_content = files.read()
         files_content = [i.split('\x01') for i in files_content.split('\x02')][:-1]
     data = pd.DataFrame(files_content, columns = ['Title', 'Date', 'Article'])
-    data.to_csv(OUTPUT_PATH + 'truthSeekerData.csv', index = False, encoding = 'utf-8')
+    data.to_excel(OUTPUT_PATH + 'truthSeekerData.xlsx', index = False, encoding = 'utf-8')
     
 # =========================================================================== #
 #                                                                             #
@@ -107,4 +107,4 @@ if __name__ == '__main__':
     if RESCRAPE_POSTS == True:
         scrape_posts()
         
-    txt2csv()
+    txt2xlsx()
