@@ -3,7 +3,7 @@
 """
 Created on Fri Sep 25 10:38:22 2020
 
-@author: en-chengchang
+@author: Long Mai
 """
 
 # =========================================================================== #
@@ -12,18 +12,18 @@ Created on Fri Sep 25 10:38:22 2020
 # =========================================================================== #
 
 from tqdm import tqdm
-from selenium import webdriver
 import pandas as pd
 import re
 import os
+from bs4 import BeautifulSoup
+import requests
 
 # =========================================================================== #
 #                                                                             #
 #                                                                             #
 # =========================================================================== #
 
-CHROME_PATH     = '/Users/en-chengchang/Downloads/chromedriver'
-OUTPUT_PATH     = '/Users/en-chengchang/Desktop/bootcamp/PeerLearning/ML-Labs-webscraping/Data/'
+OUTPUT_PATH     = './Data/'
 CATEGORY_URL    = 'http://www.thetruthseeker.co.uk/?page_id=12'
 MAIN_PAGE_PAT   = 'http://www.thetruthseeker.co.uk/?p='
 RESCRAPE_URL    = True
@@ -39,18 +39,14 @@ def explore_accesible_posts():
     try: os.remove(OUTPUT_PATH + 'truthSeekerURL.txt')
     except: pass
     
-    web_driver = webdriver.Chrome(CHROME_PATH)
-    web_driver.get(CATEGORY_URL)
-    page_source = web_driver.page_source
+    page_source = requests.get(CATEGORY_URL).text
     category_set = re.findall('http://www.thetruthseeker.co.uk/\?cat=[0-9]+', page_source)
-    
     
     for category in tqdm(category_set):
           
         page = 1
         while True:
-            web_driver.get(category +'&paged='+ str(page))
-            page_source = web_driver.page_source
+            page_source = requests.get(category +'&paged='+ str(page)).text
             access_p = re.findall('div id="post-([0-9]+)', page_source)  
 
             if access_p == ['0'] or page == MAX_PAGE + 1:  break
@@ -60,7 +56,6 @@ def explore_accesible_posts():
                 files_content = files.read()
                 files.write(files_content + '\n')
                 files.write('\n'.join([MAIN_PAGE_PAT + i for i in access_p]))
-    web_driver.close()
     
     
 def scrape_posts():
@@ -71,16 +66,16 @@ def scrape_posts():
         files_content = files.read()
         files_content = [i for i in files_content.split('\n') if i != '']
     
-    web_driver = webdriver.Chrome(CHROME_PATH)
-    
     for url in tqdm(files_content):
-        web_driver.get(url)    
-        
         post_num = re.search('=([0-9]+)', url).group(1)
+        raw_html = requests.get('http://www.thetruthseeker.co.uk/?p=' +str(post_num)).text
+        tree = BeautifulSoup(raw_html,'lxml')
+        
         try:
-            title = web_driver.find_element_by_xpath('//*[@id="post-{0}"]/h1'.format(post_num)).text
-            time = web_driver.find_element_by_xpath('//*[@id="post-{0}"]/p[1]/abbr'.format(post_num)).text
-            article = web_driver.find_element_by_xpath('//*[@id="post-{0}"]/div'.format(post_num)).text
+            title = tree.find("h1",{"class": "post-title entry-title"}).text
+            article = tree.find("div",{"class": "entry-content"}).text
+            sub_tree = tree.find("div",{"id": "post-" + str(post_num)})
+            time = sub_tree.find("abbr",{"class": "published"}).text            
             with open(OUTPUT_PATH + 'truthSeekerCont.txt', 'a+') as files: 
                 files_content = files.read()
                 files.write('\x01'.join([title, time, article]) + '\x02')
